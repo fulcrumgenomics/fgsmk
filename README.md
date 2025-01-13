@@ -15,12 +15,6 @@ This package is intended for use within a Snakemake workflow project.
 Install the Python package and dependency management tool [`poetry`](https://python-poetry.org/docs/#installation) using official documentation.
 You must have Python 3.11 or greater available on your system path, which could be managed by [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html), [`pyenv`](https://github.com/pyenv/pyenv), or another package manager.
 
-Add the package as a submodule to the parent project.
-
-```console
-git add submodule git@github.com:fulcrumgenomics/fgsmk.git
-```
-
 Install with `poetry` into the `mamba` environment for the parent project.
 
 ```console
