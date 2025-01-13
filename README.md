@@ -6,45 +6,43 @@
 [![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://docs.astral.sh/ruff/)
 
-A library of utility functions for running Snakemake workflows.
+A set of utility functions for use in Snakemake workflows.
 
 ## Recommended Installation
 
+This package is intended for use within a Snakemake workflow project.
+
 Install the Python package and dependency management tool [`poetry`](https://python-poetry.org/docs/#installation) using official documentation.
-You must have Python 3.11 or greater available on your system path, which could be managed by [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html), [`pyenv`](https://github.com/pyenv/pyenv), or another package manager. 
-Finally, install the dependencies of the project with:
+You must have Python 3.11 or greater available on your system path, which could be managed by [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html), [`pyenv`](https://github.com/pyenv/pyenv), or another package manager.
+
+Add the package as a submodule to the parent project.
 
 ```console
-poetry install
+git add submodule git@github.com:fulcrumgenomics/fgsmk.git
 ```
 
-To check successful installation, run:
+Install with `poetry` into the `mamba` environment for the parent project.
 
 ```console
-poetry run fgsmk hello --name Fulcrum
+poetry install --directory fgsmk
 ```
 
-## Installing into a Mamba Environment
+## Usage
 
-Install the Python package and dependency management tool [`poetry`](https://python-poetry.org/docs/#installation) and the environment manager [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) using official documentation.
-Create and activate a virtual environment with Python 3.11 or greater:
+### Error summary file
 
-```console
-mamba create -n fgsmk python=3.11
-mamba activate fgsmk
+Set the `onerror` directive in a Snakemake workflow to point to the `fgsmk.on_error` function.
+
+```
+from fgsmk.log import on_error
+
+onerror:
+    on_error(snakefile=Path(__file__), config=config, log=Path(log))
+    """Block of code that gets called if the snakemake pipeline exits with an error."""
 ```
 
-Then, because Poetry will auto-detect an activated environment, install the project with:
-
-```console
-poetry install
-```
-
-To check successful installation, run:
-
-```console
-fgsmk hello --name Fulcrum
-```
+This will produce a file `error_summary.txt` containing the last (up to) 50 lines of the log files of any rules that failed execution.
+The content will also be output to `stdout`.
 
 ## Development and Testing
 
