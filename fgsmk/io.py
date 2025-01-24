@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Iterable
 from typing import Optional
 
-# The default number of lines to return from the log files for each failed job
 __LINES_PER_LOGFILE: int = 50
+"""The default number of lines to return from the log files for each failed job."""
 
 
 def read_lines(path: Path) -> list[str]:
