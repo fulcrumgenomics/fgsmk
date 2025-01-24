@@ -20,7 +20,7 @@ If you have a `mamba` environment for the parent project, activate it first.
 Install with `poetry`.
 
 ```console
-poetry install --directory fgsmk
+poetry install
 ```
 
 ## Usage
