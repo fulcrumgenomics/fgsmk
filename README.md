@@ -15,7 +15,9 @@ This package is intended for use within a Snakemake workflow project.
 Install the Python package and dependency management tool [`poetry`](https://python-poetry.org/docs/#installation) using official documentation.
 You must have Python 3.11 or greater available on your system path, which could be managed by [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html), [`pyenv`](https://github.com/pyenv/pyenv), or another package manager.
 
-Install with `poetry` into the `mamba` environment for the parent project.
+If you have a `mamba` environment for the parent project, activate it first.
+
+Install with `poetry`.
 
 ```console
 poetry install --directory fgsmk
@@ -27,7 +29,7 @@ poetry install --directory fgsmk
 
 Set the `onerror` directive in a Snakemake workflow to point to the `fgsmk.on_error` function.
 
-```
+```python
 from fgsmk.log import on_error
 
 onerror:
