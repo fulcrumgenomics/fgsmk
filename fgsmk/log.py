@@ -53,7 +53,7 @@ class RuleLog:
         return logs
 
 
-def summarize_snakemake_errors(
+def _summarize_snakemake_errors(
     path: Path, lines_per_log: Optional[int] = __LINES_PER_LOGFILE
 ) -> list[str]:
     """
@@ -131,7 +131,7 @@ def on_error(
                     preface.append(f"config = {config}")
         preface.append("Detailed error information follows.")
 
-        summary = preface + summarize_snakemake_errors(path=log, lines_per_log=lines_per_log)
+        summary = preface + _summarize_snakemake_errors(path=log, lines_per_log=lines_per_log)
         text = "\n".join(summary)
         pipeline_name = snakefile.with_suffix("").name
         logging.getLogger(pipeline_name).error(text)
