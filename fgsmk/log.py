@@ -11,7 +11,6 @@ import attr
 
 from fgsmk.io import __LINES_PER_LOGFILE
 from fgsmk.io import last_lines
-from fgsmk.io import read_lines
 
 
 @dataclass(frozen=True)
@@ -34,7 +33,7 @@ class RuleLog:
     @classmethod
     def get_logs(cls, snakemake_log: Path) -> list["RuleLog"]:
         """Gets the logs for the rules from a Snakemake log file."""
-        lines: list[str] = read_lines(path=snakemake_log)
+        lines: list[str] = snakemake_log.read_text().splitlines()
 
         logs: list[RuleLog] = []
         while lines:
