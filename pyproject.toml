@@ -20,6 +20,7 @@ classifiers   = [
 [tool.poetry.dependencies]
 python    = "^3.11"
 defopt    = "^6.4.0"
+fgpyo     = "0.8.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy        = "^1.13.0"
