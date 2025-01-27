@@ -7,9 +7,11 @@ from typing import Any
 from typing import ClassVar
 
 import attr
+from fgpyo.io import assert_path_is_readable
+from fgpyo.io import assert_path_is_writable
 
 from fgsmk.io import __LINES_PER_LOGFILE
-from fgsmk.io import last_lines
+from fgsmk.io import _last_lines
 
 
 @dataclass(frozen=True)
@@ -31,7 +33,16 @@ class RuleLog:
 
     @classmethod
     def get_logs(cls, snakemake_log: Path) -> list["RuleLog"]:
-        """Gets the logs for the rules from a Snakemake log file."""
+        """
+        Gets the logs for the rules from a Snakemake log file.
+
+        Args:
+            snakemake_log: the path to the Snakemake log file
+
+        Returns:
+            a list of RuleLog instances, one for each failed rule invocation.
+        """
+        assert_path_is_readable(path=snakemake_log)
         lines: list[str] = snakemake_log.read_text().splitlines()
 
         logs: list[RuleLog] = []
@@ -69,18 +80,19 @@ def _summarize_snakemake_errors(
     Args:
         path: the path to the main snakemake log file
         lines_per_log: the number of lines to pull from each log file, None to return all lines
+
     Returns:
         a list of lines containing summary information on all failed rule invocations
     """
     summary = []
 
-    logs: list[RuleLog] = RuleLog.get_logs(snakemake_log=path, max_lines=lines_per_log)
+    logs: list[RuleLog] = RuleLog.get_logs(snakemake_log=path)
 
     for log in logs:
         summary.append(f"========== Start of Error Info for {log.name} ==========")
         summary.append(f"Failed rule: {log.name}")
         summary.append(f"Last {lines_per_log} lines of log file: {log.path}")
-        for line in last_lines(log.path, lines_per_log):
+        for line in _last_lines(path=log.path, max_lines=lines_per_log):
             summary.append(f"    {line}")
         summary.append(f"=========== End of Error Info for {log.name} ===========")
 
@@ -134,7 +146,10 @@ def on_error(
         text = "\n".join(summary)
         pipeline_name = snakefile.with_suffix("").name
         logging.getLogger(pipeline_name).error(text)
-        with Path("./error_summary.txt").open("w") as out:
+
+        error_summary_file = Path("./error_summary.txt")
+        assert_path_is_writable(path=error_summary_file)
+        with error_summary_file.open("w") as out:
             out.write(text)
     except Exception as ex:
         print("###########################################################################")

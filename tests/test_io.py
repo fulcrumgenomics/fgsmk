@@ -26,9 +26,8 @@ def test_read_last_lines(
 
 def test_read_last_lines_no_file_error(tmp_path: Path) -> None:
     """Test reading the last lines from a non-existent file."""
-    last: list[str] = _last_lines(path=tmp_path / "non_existent.txt", max_lines=50)
-
-    assert last[0].startswith(">>> Could not open log file for reading")
+    with pytest.raises(AssertionError, match="Cannot read non-existent path"):
+        _last_lines(path=tmp_path / "non_existent.txt")
 
 
 def test_read_last_lines_non_positive_max_lines_error(tmp_path: Path) -> None:
@@ -36,5 +35,5 @@ def test_read_last_lines_non_positive_max_lines_error(tmp_path: Path) -> None:
     lines: list[str] = ["line 1", "line 2", "line 3"]
     file: Path = tmp_path / "test.txt"
     file.write_text("\n".join(lines))
-    with pytest.raises(ValueError, match="Number of lines requested must be > 0. Saw 0"):
+    with pytest.raises(ValueError, match="Number of lines requested must be > 0. Saw 0."):
         _last_lines(path=file, max_lines=0)
