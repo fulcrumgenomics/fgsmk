@@ -14,7 +14,6 @@ Table of Contents
 * [Recommended Installation](#recommended-installation)
 * [Usage](#usage)
    * [Error summary file](#error-summary-file)
-   * [Last lines of a text file](#last-lines-of-a-text-file)
 * [Development and Testing](#development-and-testing)
 
 ## Recommended Installation
@@ -48,16 +47,6 @@ onerror:
 
 This will produce a file `error_summary.txt` containing the last (up to) 50 lines of the log files of any rules that failed execution.
 The content will also be output to `stdout`.
-
-### Last lines of a text file
-
-It can be useful to get just the last `N` lines of a text file using Python rather than `bash tail`.
-
-```python
-from fgsmk.io import last_lines
-
-file_tail: list[str] = last_lines(path=myfile, max_lines=5)
-```
 
 ## Development and Testing
 
