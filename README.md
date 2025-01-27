@@ -6,7 +6,16 @@
 [![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://docs.astral.sh/ruff/)
 
-A set of utility functions for use in Snakemake workflows.
+A set of utility functions for use in Snakemake workflows. Supports Snakemake 8+.
+
+Table of Contents
+=================
+
+* [Recommended Installation](#recommended-installation)
+* [Usage](#usage)
+   * [Error summary file](#error-summary-file)
+   * [Last lines of a text file](#last-lines-of-a-text-file)
+* [Development and Testing](#development-and-testing)
 
 ## Recommended Installation
 
