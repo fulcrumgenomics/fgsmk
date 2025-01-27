@@ -126,13 +126,12 @@ jobs:
     needs: make-changelog
     steps:
       - name: Download the sdist
-       uses: actions/download-artifact@v4
-       with:
+        uses: actions/download-artifact@v4
+        with:
           name: fgsmk-sdist
           path: fgsmk-sdist.zip
       - name: Unzip
         run: unzip fgsmk-sdist.zip
-      - name: Create Draft Release
       - name: Create Draft Release
         id: create_release
         uses: softprops/action-gh-release@v2
