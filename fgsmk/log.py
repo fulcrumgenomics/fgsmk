@@ -5,7 +5,6 @@ from itertools import dropwhile
 from pathlib import Path
 from typing import Any
 from typing import ClassVar
-from typing import Optional
 
 import attr
 
@@ -54,7 +53,7 @@ class RuleLog:
 
 
 def _summarize_snakemake_errors(
-    path: Path, lines_per_log: Optional[int] = __LINES_PER_LOGFILE
+    path: Path, lines_per_log: int | None = __LINES_PER_LOGFILE
 ) -> list[str]:
     """
     Summarizes any errors that occurred during a run of a pipeline.
@@ -90,9 +89,9 @@ def _summarize_snakemake_errors(
 
 def on_error(
     snakefile: Path,
-    config: Optional[Any],
+    config: Any | None,
     log: Path,
-    lines_per_log: Optional[int] = __LINES_PER_LOGFILE,
+    lines_per_log: int | None = __LINES_PER_LOGFILE,
 ) -> None:
     """
     Block of code that gets called if the snakemake pipeline exits with an error.

@@ -1,11 +1,10 @@
 from pathlib import Path
-from typing import Optional
 
 __LINES_PER_LOGFILE: int = 50
 """The default number of lines to return from the log files for each failed job."""
 
 
-def last_lines(path: Path, max_lines: Optional[int] = __LINES_PER_LOGFILE) -> list[str]:
+def _last_lines(path: Path, max_lines: int | None = __LINES_PER_LOGFILE) -> list[str]:
     """
     Returns the last N lines from a file as a list.
 
@@ -18,7 +17,7 @@ def last_lines(path: Path, max_lines: Optional[int] = __LINES_PER_LOGFILE) -> li
     Raises:
         ValueError: If the number of lines requested is <= 0.
     """
-    if max_lines <= 0:
+    if max_lines is not None and max_lines <= 0:
         raise ValueError(f"Number of lines requested must be > 0. Saw {max_lines}.")
 
     try:
