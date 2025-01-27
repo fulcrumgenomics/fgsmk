@@ -1,0 +1,157 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 14
+Rules claiming more threads will be scaled down.
+Provided resources: mem_gb=38
+Job stats:
+job                 count
+----------------  -------
+all                     1
+download_genomes        3
+total                   4
+
+Select jobs to execute...
+Failed to solve scheduling problem with ILP solver in time (10s). Falling back to greedy solver.
+Execute 3 jobs...
+
+[Fri Sep  6 16:39:41 2024]
+localrule download_genomes:
+    output: data/genomes/GCF_012345678.1, data/genomes/GCF_012345678.1/assembly_data_report.tsv
+    log: logs/download_genomes.GCF_012345678.1.log
+    jobid: 2
+    reason: Missing output files: data/genomes/GCF_012345678.1/assembly_data_report.tsv
+    wildcards: accession=GCF_012345678.1
+    resources: tmpdir=/tmp
+
+
+        (
+            mkdir -p data/genomes/GCF_012345678.1
+            pushd data/genomes/GCF_012345678.1
+            datasets download genomes accession GCF_012345678.1
+            unzip ncbi_dataset.zip
+            rm ncbi_dataset.zip
+            mv ncbi_dataset/data/* ./
+            rm -r ncbi_dataset README.md
+            cat assembly_data_report.jsonl |                 dataformat tsv genome |                 cut -f 1-51 |                 uniq                 > assembly_data_report.tsv
+            popd
+        ) &> logs/download_genomes.GCF_012345678.1.log
+        
+
+[Fri Sep  6 16:39:41 2024]
+localrule download_genomes:
+    output: data/genomes/GCF_000987654.1, data/genomes/GCF_000987654.1/assembly_data_report.tsv
+    log: logs/download_genomes.GCF_000987654.1.log
+    jobid: 3
+    reason: Missing output files: data/genomes/GCF_000987654.1/assembly_data_report.tsv
+    wildcards: accession=GCF_000987654.1
+    resources: tmpdir=/tmp
+
+
+        (
+            mkdir -p data/genomes/GCF_000987654.1
+            pushd data/genomes/GCF_000987654.1
+            datasets download genomes accession GCF_000987654.1
+            unzip ncbi_dataset.zip
+            rm ncbi_dataset.zip
+            mv ncbi_dataset/data/* ./
+            rm -r ncbi_dataset README.md
+            cat assembly_data_report.jsonl |                 dataformat tsv genome |                 cut -f 1-51 |                 uniq                 > assembly_data_report.tsv
+            popd
+        ) &> logs/download_genomes.GCF_000987654.1.log
+        
+
+[Fri Sep  6 16:39:41 2024]
+localrule download_genomes:
+    output: data/genomes/GCF_023232323.1, data/genomes/GCF_023232323.1/assembly_data_report.tsv
+    log: logs/download_genomes.GCF_023232323.1.log
+    jobid: 1
+    reason: Missing output files: data/genomes/GCF_023232323.1/assembly_data_report.tsv
+    wildcards: accession=GCF_023232323.1
+    resources: tmpdir=/tmp
+
+
+        (
+            mkdir -p data/genomes/GCF_023232323.1
+            pushd data/genomes/GCF_023232323.1
+            datasets download genomes accession GCF_023232323.1
+            unzip ncbi_dataset.zip
+            rm ncbi_dataset.zip
+            mv ncbi_dataset/data/* ./
+            rm -r ncbi_dataset README.md
+            cat assembly_data_report.jsonl |                 dataformat tsv genome |                 cut -f 1-51 |                 uniq                 > assembly_data_report.tsv
+            popd
+        ) &> logs/download_genomes.GCF_023232323.1.log
+        
+[Fri Sep  6 16:39:41 2024]
+Error in rule download_genomes:
+    jobid: 1
+    output: data/genomes/GCF_023232323.1, data/genomes/GCF_023232323.1/assembly_data_report.tsv
+    log: logs/download_genomes.GCF_023232323.1.log (check log file(s) for error details)
+    shell:
+        
+        (
+            mkdir -p data/genomes/GCF_023232323.1
+            pushd data/genomes/GCF_023232323.1
+            datasets download genomes accession GCF_023232323.1
+            unzip ncbi_dataset.zip
+            rm ncbi_dataset.zip
+            mv ncbi_dataset/data/* ./
+            rm -r ncbi_dataset README.md
+            cat assembly_data_report.jsonl |                 dataformat tsv genome |                 cut -f 1-51 |                 uniq                 > assembly_data_report.tsv
+            popd
+        ) &> logs/download_genomes.GCF_023232323.1.log
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+[Fri Sep  6 16:39:41 2024]
+[Fri Sep  6 16:39:41 2024]
+Error in rule download_genomes:
+    jobid: 2
+    output: data/genomes/GCF_012345678.1, data/genomes/GCF_012345678.1/assembly_data_report.tsv
+    log: logs/download_genomes.GCF_012345678.1.log (check log file(s) for error details)
+    shell:
+        
+        (
+            mkdir -p data/genomes/GCF_012345678.1
+            pushd data/genomes/GCF_012345678.1
+            datasets download genomes accession GCF_012345678.1
+            unzip ncbi_dataset.zip
+            rm ncbi_dataset.zip
+            mv ncbi_dataset/data/* ./
+            rm -r ncbi_dataset README.md
+            cat assembly_data_report.jsonl |                 dataformat tsv genome |                 cut -f 1-51 |                 uniq                 > assembly_data_report.tsv
+            popd
+        ) &> logs/download_genomes.GCF_012345678.1.log
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error in rule download_genomes:
+    jobid: 3
+    output: data/genomes/GCF_000987654.1, data/genomes/GCF_000987654.1/assembly_data_report.tsv
+    log: logs/download_genomes.GCF_000987654.1.log (check log file(s) for error details)
+    shell:
+        
+        (
+            mkdir -p data/genomes/GCF_000987654.1
+            pushd data/genomes/GCF_000987654.1
+            datasets download genomes accession GCF_000987654.1
+            unzip ncbi_dataset.zip
+            rm ncbi_dataset.zip
+            mv ncbi_dataset/data/* ./
+            rm -r ncbi_dataset README.md
+            cat assembly_data_report.jsonl |                 dataformat tsv genome |                 cut -f 1-51 |                 uniq                 > assembly_data_report.tsv
+            popd
+        ) &> logs/download_genomes.GCF_000987654.1.log
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Removing output files of failed job download_genomes since they might be corrupted:
+data/genomes/GCF_023232323.1
+Removing output files of failed job download_genomes since they might be corrupted:
+data/genomes/GCF_012345678.1
+Removing output files of failed job download_genomes since they might be corrupted:
+data/genomes/GCF_000987654.1
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-01-27T163930.589415.snakemake.log
+WorkflowError:
+At least one job did not complete successfully.

@@ -29,12 +29,12 @@ class RuleLog:
 
     RULE_ERROR_PREFIX: ClassVar[str] = "Error in rule "
     LOG_PREFIX: ClassVar[str] = "    log: "
-    LOG_SUFFIX: ClassVar[str] = " (check log file(s) for error message)"
+    LOG_SUFFIX: ClassVar[str] = " (check log file(s) for error details)"
 
     @classmethod
     def get_logs(cls, snakemake_log: Path) -> list["RuleLog"]:
         """
-        Gets the logs for the rules from a Snakemake log file.
+        Gets the logs for the rules from a Snakemake log file for failed invocations.
 
         Args:
             snakemake_log: the path to the Snakemake log file
@@ -70,8 +70,10 @@ def _summarize_snakemake_errors(
     Summarizes any errors that occurred during a run of a pipeline.
 
     Uses the snakemake log to find all failed rule invocations and their log files. Produces a list
-    of lines containing summary information per failed rule invocation and the last 50 lines of each
-    log file.
+    of lines containing summary information per failed rule invocation and the last 50 (by default)
+    lines of each log file.
+
+    If a rule has no log file defined, it won't be included in the summary.
 
     Notes:
         * fails if rule has more than one log file defined
