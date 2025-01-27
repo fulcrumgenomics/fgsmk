@@ -13,8 +13,6 @@ from fgpyo.io import assert_path_is_writable
 from fgsmk.io import __LINES_PER_LOGFILE
 from fgsmk.io import _last_lines
 
-logger = logging.getLogger(__name__)
-
 
 @dataclass(frozen=True)
 class RuleLog:
