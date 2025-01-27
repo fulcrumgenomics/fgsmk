@@ -13,6 +13,8 @@ from fgpyo.io import assert_path_is_writable
 from fgsmk.io import __LINES_PER_LOGFILE
 from fgsmk.io import _last_lines
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass(frozen=True)
 class RuleLog:
@@ -20,11 +22,11 @@ class RuleLog:
     Stores the path and name for the log file for a rule.
 
     Attributes:
-        path: the path to the log file for the rule
+        path: the optional path to the log file for the rule
         name: the name of the rule
     """
 
-    path: Path
+    path: Path | None
     name: str
 
     RULE_ERROR_PREFIX: ClassVar[str] = "Error in rule "
@@ -35,6 +37,9 @@ class RuleLog:
     def get_logs(cls, snakemake_log: Path) -> list["RuleLog"]:
         """
         Gets the logs for the rules from a Snakemake log file for failed invocations.
+
+        If there is more than one log file for a rule, all of them will be included. If there is no
+        log file defined for a rule, it will be reported but with the path set to `None`.
 
         Args:
             snakemake_log: the path to the Snakemake log file
@@ -52,13 +57,29 @@ class RuleLog:
             )
             if lines:
                 rule_name: str = lines[0][len(cls.RULE_ERROR_PREFIX) : -1]
-                lines = list(
-                    dropwhile(lambda line: not line.startswith(cls.LOG_PREFIX), iter(lines))
+                assert len(lines) > 1, (
+                    f"Expected at least one line in the Snakemake log file after:\n{lines[0]}"
                 )
-                dir: Path = Path(".").absolute()
-                log_path = dir / lines[0][len(cls.LOG_PREFIX) : -len(cls.LOG_SUFFIX)]
-                lines = lines[1:]
-                logs.append(RuleLog(path=log_path, name=rule_name))
+                lines = list(
+                    dropwhile(
+                        lambda line: not line.startswith(cls.LOG_PREFIX)
+                        and not line.startswith(cls.RULE_ERROR_PREFIX),
+                        iter(lines[1:]),
+                    )
+                )
+                if lines and lines[0].startswith(cls.LOG_PREFIX):
+                    dir: Path = Path(".").absolute()
+                    log_files: list[str] = lines[0][
+                        len(cls.LOG_PREFIX) : -len(cls.LOG_SUFFIX)
+                    ].split(", ")
+
+                    for log_file in log_files:
+                        log_path = dir / log_file
+                        logs.append(RuleLog(path=log_path, name=rule_name))
+
+                    lines = lines[1:]
+                else:
+                    logs.append(RuleLog(path=None, name=rule_name))
 
         return logs
 
@@ -73,11 +94,8 @@ def _summarize_snakemake_errors(
     of lines containing summary information per failed rule invocation and the last 50 (by default)
     lines of each log file.
 
-    If a rule has no log file defined, it won't be included in the summary.
-
-    Notes:
-        * fails if rule has more than one log file defined
-        * fails if rule has no log file defined
+    If a rule has no log file defined, it won't be included in the summary. If a rule has multiple
+    log files, all of them will be included.
 
     Args:
         path: the path to the main snakemake log file
@@ -93,9 +111,13 @@ def _summarize_snakemake_errors(
     for log in logs:
         summary.append(f"========== Start of Error Info for {log.name} ==========")
         summary.append(f"Failed rule: {log.name}")
-        summary.append(f"Last {lines_per_log} lines of log file: {log.path}")
-        for line in _last_lines(path=log.path, max_lines=lines_per_log):
-            summary.append(f"    {line}")
+
+        if log.path is None:
+            summary.append("No log file defined.")
+        else:
+            summary.append(f"Last {lines_per_log} lines of log file: {log.path}")
+            for line in _last_lines(path=log.path, max_lines=lines_per_log):
+                summary.append(f"    {line}")
         summary.append(f"=========== End of Error Info for {log.name} ===========")
 
     return summary
