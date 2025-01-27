@@ -13,6 +13,13 @@ jobs:
     outputs:
       on_main: ${{ steps.contains_tag.outputs.retval }}
     steps:
+      # TODO: remove this and the `git branch -a` when the following PR
+      # is merged and released:
+      #   https://github.com/rickstaa/action-contains-tag/pull/18
+      - name: git config --global remote.origin.followRemoteHEAD never
+        shell: bash
+        run: git config --global remote.origin.followRemoteHEAD never
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -118,6 +125,14 @@ jobs:
       pull-requests: read
     needs: make-changelog
     steps:
+      - name: Download the sdist
+       uses: actions/download-artifact@v4
+       with:
+          name: fgsmk-sdist
+          path: fgsmk-sdist.zip
+      - name: Unzip
+        run: unzip fgsmk-sdist.zip
+      - name: Create Draft Release
       - name: Create Draft Release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -126,3 +141,5 @@ jobs:
           body: ${{ needs.make-changelog.outputs.release_body }}
           draft: false
           prerelease: false
+          files:
+            fgsmk*.tar.gz
