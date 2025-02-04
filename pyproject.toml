@@ -19,7 +19,6 @@ classifiers   = [
 
 [tool.poetry.dependencies]
 python    = "^3.11"
-defopt    = "^6.4.0"
 fgpyo     = "0.8.0"
 
 [tool.poetry.group.dev.dependencies]
@@ -102,10 +101,6 @@ exclude                     = [
     "docs/",
     "site/",
 ]
-
-[[tool.mypy.overrides]]
-module = "defopt"
-ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "7.4"
