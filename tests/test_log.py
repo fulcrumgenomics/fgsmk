@@ -6,6 +6,7 @@ from fgsmk.log import RuleLog
 
 def test_rule_log_get_logs(datadir: Path) -> None:
     """Test parsing Snakemake log for rule logs."""
+    # TODO: Run the `failing_rules.smk` directly to generate this log once PR#5 is merged
     snakemake_log: Path = datadir / "snakemake.log"
     logs = RuleLog.get_logs(snakemake_log=snakemake_log)
 
