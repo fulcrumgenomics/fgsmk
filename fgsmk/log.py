@@ -1,3 +1,4 @@
+import dataclasses
 import enum
 import logging
 from dataclasses import dataclass
@@ -6,7 +7,6 @@ from pathlib import Path
 from typing import Any
 from typing import ClassVar
 
-import attr
 from fgpyo.io import assert_path_is_readable
 from fgpyo.io import assert_path_is_writable
 
@@ -149,7 +149,7 @@ def on_error(
         # print the config attributes
         if config is not None:
             try:
-                for attribute in attr.fields(type(config)):
+                for attribute in dataclasses.fields(type(config)):
                     value = getattr(config, attribute.name)
                     if isinstance(value, enum.Enum):
                         value = value.value
