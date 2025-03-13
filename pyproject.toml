@@ -20,7 +20,6 @@ classifiers   = [
 [tool.poetry.dependencies]
 python    = "^3.11"
 fgpyo     = "0.8.0"
-defopt    = "^6.4.0"
 snakemake = "^8.27.1"
 
 [tool.poetry.group.dev.dependencies]
