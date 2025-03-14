@@ -1,14 +1,27 @@
 from collections import defaultdict
+from glob import glob
 from pathlib import Path
 
 from fgsmk.log import RuleLog
+from fgsmk.testing import run_snakemake
 
 
-def test_rule_log_get_logs(datadir: Path) -> None:
+def test_rule_log_get_logs(datadir: Path, tmp_path: Path) -> None:
     """Test parsing Snakemake log for rule logs."""
-    # TODO: Run the `failing_rules.smk` directly to generate this log once PR#5 is merged
-    snakemake_log: Path = datadir / "snakemake.log"
-    logs = RuleLog.get_logs(snakemake_log=snakemake_log)
+    # Run the Snakefile with failing rules
+    snakefile: Path = datadir / "failing_rules.smk"
+
+    rules: dict[str, int] = {
+        "all": 1,
+        "single_log_file": 1,
+        "total": 2,
+    }
+
+    run_snakemake(snakefile=snakefile, workdir=tmp_path, executor_name="local", rules=rules)
+
+    snakemake_logs: list[Path] = glob(str(tmp_path / ".snakemake/log/*.snakemake.log"))
+    assert len(snakemake_logs) == 1
+    logs = RuleLog.get_logs(base_path=tmp_path, snakemake_log=Path(snakemake_logs[0]))
 
     assert len(logs) == 8
 
@@ -19,31 +32,24 @@ def test_rule_log_get_logs(datadir: Path) -> None:
     assert set(rule_to_logs.keys()) == {"single_log_file", "multiple_log_files", "no_log_file"}
 
     assert len(rule_to_logs["single_log_file"]) == 2
-    assert (
-        Path(Path.cwd() / "single_log_file.GCF_012345678.1.log") in rule_to_logs["single_log_file"]
-    )
-    assert (
-        Path(Path.cwd() / "single_log_file.GCF_000987654.1.log") in rule_to_logs["single_log_file"]
-    )
-
-    for path in rule_to_logs["multiple_log_files"]:
-        print(path)
+    assert Path(tmp_path / "single_log_file.GCF_012345678.1.log") in rule_to_logs["single_log_file"]
+    assert Path(tmp_path / "single_log_file.GCF_000987654.1.log") in rule_to_logs["single_log_file"]
 
     assert len(rule_to_logs["multiple_log_files"]) == 4
     assert (
-        Path(Path.cwd() / "multiple_log_files.download.GCF_012345678.1.log")
+        Path(tmp_path / "multiple_log_files.download.GCF_012345678.1.log")
         in rule_to_logs["multiple_log_files"]
     )
     assert (
-        Path(Path.cwd() / "multiple_log_files.download.GCF_000987654.1.log")
+        Path(tmp_path / "multiple_log_files.download.GCF_000987654.1.log")
         in rule_to_logs["multiple_log_files"]
     )
     assert (
-        Path(Path.cwd() / "multiple_log_files.index.GCF_012345678.1.log")
+        Path(tmp_path / "multiple_log_files.index.GCF_012345678.1.log")
         in rule_to_logs["multiple_log_files"]
     )
     assert (
-        Path(Path.cwd() / "multiple_log_files.index.GCF_000987654.1.log")
+        Path(tmp_path / "multiple_log_files.index.GCF_000987654.1.log")
         in rule_to_logs["multiple_log_files"]
     )
 

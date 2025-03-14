@@ -30,9 +30,10 @@ class RuleLog:
     RULE_ERROR_PREFIX: ClassVar[str] = "Error in rule "
     LOG_PREFIX: ClassVar[str] = "    log: "
     LOG_SUFFIX: ClassVar[str] = " (check log file(s) for error details)"
+    SHELL_PREFIX: ClassVar[str] = "    shell:"
 
     @classmethod
-    def get_logs(cls, snakemake_log: Path) -> list["RuleLog"]:
+    def get_logs(cls, base_path: Path, snakemake_log: Path) -> list["RuleLog"]:
         """
         Gets the logs for the rules from a Snakemake log file for failed invocations.
 
@@ -40,6 +41,7 @@ class RuleLog:
         log file defined for a rule, it will be reported but with the path set to `None`.
 
         Args:
+            base_path: the base path for log file paths
             snakemake_log: the path to the Snakemake log file
 
         Returns:
@@ -61,23 +63,23 @@ class RuleLog:
                 lines = list(
                     dropwhile(
                         lambda line: not line.startswith(cls.LOG_PREFIX)
+                        and not line.startswith(cls.SHELL_PREFIX)
                         and not line.startswith(cls.RULE_ERROR_PREFIX),
                         iter(lines[1:]),
                     )
                 )
-                if lines and lines[0].startswith(cls.LOG_PREFIX):
-                    dir: Path = Path(".").absolute()
+                if lines and lines[0].startswith(cls.SHELL_PREFIX):
+                    logs.append(RuleLog(path=None, name=rule_name))
+                elif lines and lines[0].startswith(cls.LOG_PREFIX):
                     log_files: list[str] = lines[0][
                         len(cls.LOG_PREFIX) : -len(cls.LOG_SUFFIX)
                     ].split(", ")
 
                     for log_file in log_files:
-                        log_path = dir / log_file
+                        log_path = base_path / log_file
                         logs.append(RuleLog(path=log_path, name=rule_name))
 
                     lines = lines[1:]
-                else:
-                    logs.append(RuleLog(path=None, name=rule_name))
 
         return logs
 
@@ -104,7 +106,8 @@ def _summarize_snakemake_errors(
     """
     summary = []
 
-    logs: list[RuleLog] = RuleLog.get_logs(snakemake_log=path)
+    dir: Path = Path(".").absolute()
+    logs: list[RuleLog] = RuleLog.get_logs(base_path=dir, snakemake_log=path)
 
     for log in logs:
         summary.append(f"========== Start of Error Info for {log.name} ==========")
