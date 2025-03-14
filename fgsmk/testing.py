@@ -56,6 +56,7 @@ def run_snakemake(
     snakefile: Path,
     workdir: Path,
     rules: Dict[str, int],
+    executor_name: str = "dryrun",
     config: Optional[Dict[str, Any]] = None,
     configfiles: Optional[List[Path]] = None,
     quiet: bool = True,
@@ -67,6 +68,7 @@ def run_snakemake(
         snakefile: the snake file to execute
         workdir: the working directory in which to run Snakemake
         rules: a mapping of rule name to expect # of times it should run
+        executor_name: the executor to use, "dryrun" is the default
         config: the optional configuration object for Snakemake
         configfiles: the optional list of configuration files for Snakemake
         quiet: tells snakemake to not output logging, set to true for debugging failing pipelines
@@ -77,7 +79,7 @@ def run_snakemake(
     logger = SnakemakeLogger()
     quietness = None if quiet else {Quietness.ALL}
 
-    executor_plugin = ExecutorPluginRegistry().get_plugin("dryrun")
+    executor_plugin = ExecutorPluginRegistry().get_plugin(executor_name)
     executor_settings = executor_plugin.get_settings([])
 
     with SnakemakeApi(
@@ -104,7 +106,7 @@ def run_snakemake(
         dag_api = workflow_api.dag()
 
         dag_api.execute_workflow(
-            executor="dryrun",
+            executor=executor_name,
             execution_settings=ExecutionSettings(
                 standalone=True,
                 ignore_ambiguity=True,
