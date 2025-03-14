@@ -106,6 +106,7 @@ exclude                     = [
 [[tool.mypy.overrides]]
 module = [
     "snakemake.api",
+    "snakemake.exceptions",
     "snakemake.settings.types",
     "snakemake_interface_executor_plugins.registry",
 ]
