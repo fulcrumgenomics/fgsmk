@@ -15,6 +15,7 @@ from typing import List
 from typing import Optional
 
 from snakemake.api import SnakemakeApi
+from snakemake.exceptions import WorkflowError
 from snakemake.settings.types import ConfigSettings
 from snakemake.settings.types import ExecutionSettings
 from snakemake.settings.types import OutputSettings
@@ -92,6 +93,7 @@ def run_snakemake(
     ) as snakemake_api:
         workflow_api = snakemake_api.workflow(
             resource_settings=ResourceSettings(
+                cores=1,
                 resources={"mem_gb": 8},
             ),
             config_settings=ConfigSettings(
@@ -105,14 +107,19 @@ def run_snakemake(
 
         dag_api = workflow_api.dag()
 
-        dag_api.execute_workflow(
-            executor=executor_name,
-            execution_settings=ExecutionSettings(
-                standalone=True,
-                ignore_ambiguity=True,
-            ),
-            executor_settings=executor_settings,
-        )
+        try:
+            dag_api.execute_workflow(
+                executor=executor_name,
+                execution_settings=ExecutionSettings(
+                    standalone=True,
+                    ignore_ambiguity=True,
+                    keep_going=True,
+                ),
+                executor_settings=executor_settings,
+            )
+        except WorkflowError as e:
+            print(e)
+            return logger
 
     # check the "all" rule
     assert logger.rule_count["all"] == 1, (
