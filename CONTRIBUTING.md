@@ -113,8 +113,8 @@ poetry task fix-and-check-all
 6. Squash merge the PR into the `main` branch.
 7. Tag the new commit on the main branch with the bumped version number.
 
-    > [!WARNING]
-    > The tag **must** be a valid SemVer version number and **must** match the version set by `poetry version` in (3). The [publishing GitHub Action](.github/workflows/publish_fgsmk) is activated by a new tag on the `main` branch containing a valid SemVer version.
+> [!WARNING]
+> The tag **must** be a valid SemVer version number and **must** match the version set by `poetry version` in (3). The [publishing GitHub Action](.github/workflows/publish_fgsmk) is activated by a new tag on the `main` branch containing a valid SemVer version.
 
 GitHub Actions will take care of the remainder of the deployment and release process:
 
