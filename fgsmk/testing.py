@@ -36,6 +36,11 @@ class SnakemakeLogger(object):
         def fn(d: Dict[str, Any]) -> None:
             if d["level"] != "run_info":
                 return
+
+            # Only count the summary once.
+            if len(self.rule_count.keys()) > 0:
+                return
+
             # NB: skip the first three, and skip the last, lines
             for counts_line in d["msg"].split("\n")[3:-1]:
                 counts_line = counts_line.strip()
