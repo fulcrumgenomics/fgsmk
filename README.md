@@ -81,4 +81,4 @@ The content will also be output to `stdout`.
 
 ## Development and Testing
 
-See the [contributing guide](./CONTRIBUTING.md) for more information.
+See the [contributing guide](https://github.com/fulcrumgenomics/fgsmk/blob/main/CONTRIBUTING.md) for more information.
