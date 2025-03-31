@@ -33,7 +33,7 @@ class RuleLog:
     SHELL_PREFIX: ClassVar[str] = "    shell:"
 
     @classmethod
-    def get_logs(cls, base_path: Path, snakemake_log: Path) -> list["RuleLog"]:
+    def many_from_log_file(cls, base_path: Path, snakemake_log: Path) -> list["RuleLog"]:
         """
         Gets the logs for the rules from a Snakemake log file for failed invocations.
 
@@ -107,7 +107,7 @@ def _summarize_snakemake_errors(
     summary = []
 
     dir: Path = Path(".").absolute()
-    logs: list[RuleLog] = RuleLog.get_logs(base_path=dir, snakemake_log=path)
+    logs: list[RuleLog] = RuleLog.many_from_log_file(base_path=dir, snakemake_log=path)
 
     for log in logs:
         summary.append(f"========== Start of Error Info for {log.name} ==========")

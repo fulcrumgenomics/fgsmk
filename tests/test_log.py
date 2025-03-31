@@ -21,7 +21,7 @@ def test_rule_log_get_logs(datadir: Path, tmp_path: Path) -> None:
 
     snakemake_logs: list[str] = glob(str(tmp_path / ".snakemake/log/*.snakemake.log"))
     assert len(snakemake_logs) == 1
-    logs = RuleLog.get_logs(base_path=tmp_path, snakemake_log=Path(snakemake_logs[0]))
+    logs = RuleLog.many_from_log_file(base_path=tmp_path, snakemake_log=Path(snakemake_logs[0]))
 
     assert len(logs) == 8
 
