@@ -6,6 +6,7 @@ expected rules.  They are far from comprehensive, as they do not verify the anal
 of each pipeline, which should be done elsewhere.
 """
 
+import logging
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,8 @@ from snakemake.settings.types import OutputSettings
 from snakemake.settings.types import Quietness
 from snakemake.settings.types import ResourceSettings
 from snakemake_interface_executor_plugins.registry import ExecutorPluginRegistry
+
+logger = logging.getLogger(__name__)
 
 
 class SnakemakeLogger(object):
@@ -63,7 +66,7 @@ def run_snakemake(
     quiet: bool = True,
 ) -> SnakemakeLogger:
     """
-    Runs Snakemake.
+    Runs Snakemake and returns a SnakemakeLogger instance that can be queried for test results.
 
     Args:
         snakefile: the snake file to execute
@@ -77,7 +80,7 @@ def run_snakemake(
     assert snakefile.is_file(), f"{snakefile} is not a file"
     assert snakefile.exists(), f"{snakefile} does not exist"
 
-    logger = SnakemakeLogger()
+    snakemake_logger = SnakemakeLogger()
     quietness = None if quiet else {Quietness.ALL}
 
     executor_plugin = ExecutorPluginRegistry().get_plugin(executor_name)
@@ -86,7 +89,7 @@ def run_snakemake(
     with SnakemakeApi(
         OutputSettings(
             quiet=quietness,
-            log_handlers=[logger.log_handler()],
+            log_handlers=[snakemake_logger.log_handler()],
             keep_logger=False,
             stdout=True,
         )
@@ -118,21 +121,21 @@ def run_snakemake(
                 executor_settings=executor_settings,
             )
         except WorkflowError as e:
-            print(e)
-            return logger
+            logger.warning(e)
+            return snakemake_logger
 
     # check the "all" rule
-    assert logger.rule_count["all"] == 1, (
-        f"All rule was not run once, found: {logger.rule_count['all']}"
+    assert snakemake_logger.rule_count["all"] == 1, (
+        f"All rule was not run once, found: {snakemake_logger.rule_count['all']}"
     )
 
     # check that the executed rules were run the correct # of times
-    for rule, count in logger.rule_count.items():
+    for rule, count in snakemake_logger.rule_count.items():
         assert rule in rules, f"Could not find {rule} in {rules}"
         assert count == rules[rule], f"{rule}: {rules[rule]}"
 
     # check that all the expected rules were run
     for rule in rules:
-        assert rule in logger.rule_count
+        assert rule in snakemake_logger.rule_count
 
-    return logger
+    return snakemake_logger
