@@ -18,7 +18,7 @@ classifiers   = [
 ]
 
 [tool.poetry.dependencies]
-python    = "^3.11"
+python    = ">=3.11.0,<3.13"
 fgpyo     = "1.0.0"
 snakemake = "^8.27.1"
 
@@ -42,7 +42,7 @@ poetry_command = "task"
 fix-format = "ruff format"
 fix-lint   = "ruff check --fix"
 
-fix-all.ignore_fail = true
+fix-all.ignore_fail = "return_non_zero"
 fix-all.sequence    = [
     "fix-format",
     "fix-lint"
@@ -54,7 +54,7 @@ check-lint   = "ruff check"
 check-tests  = "pytest"
 check-typing = "mypy"
 
-check-all.ignore_fail = true
+check-all.ignore_fail = "return_non_zero"
 check-all.sequence    = [
     "check-lock",
     "check-format",
@@ -63,13 +63,11 @@ check-all.sequence    = [
     "check-typing"
 ]
 
-fix-and-check-all.ignore_fail = true
+fix-and-check-all.ignore_fail = "return_non_zero"
 fix-and-check-all.sequence    = [
     "fix-all",
     "check-all"
 ]
-
-
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/fulcrumgenomics/fgsmk/issues"
@@ -160,3 +158,32 @@ force-single-line = true
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.git-cliff.changelog]
+header = ""
+trim = true
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+    ## {{ group | upper_first }}
+    {% for commit in commits %}
+        - {{ commit.message | upper_first }} ({{ commit.id | truncate(length=8, end="") }})\
+    {% endfor %}
+{% endfor %}\n
+"""
+
+[tool.git-cliff.git]
+conventional_commits = true
+commit_parsers = [
+    { message = "^.+!:*", group = "Breaking"},
+    { message = "^feat*", group = "Features"},
+    { message = "^fix*", group = "Bug Fixes"},
+    { message = "^docs*", group = "Documentation"},
+    { message = "^perf*", group = "Performance"},
+    { message = "^refactor*", group = "Refactor"},
+    { message = "^style*", group = "Styling"},
+    { message = "^test*", group = "Testing"},
+    { message = "^chore\\(release\\):*", skip = true},
+    { message = "^chore*", group = "Miscellaneous Tasks"},
+    { body = ".*security", group = "Security"}
+]
+filter_commits = false
