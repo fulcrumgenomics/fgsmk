@@ -30,6 +30,7 @@ jobs:
         uses: snok/install-poetry@v1
         with:
           version: ${{env.POETRY_VERSION}}
+          installer-parallel: true
 
       - name: Set up cache
         uses: actions/cache@v4
