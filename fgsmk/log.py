@@ -55,31 +55,36 @@ class RuleLog:
             lines = list(
                 dropwhile(lambda line: not line.startswith(cls.RULE_ERROR_PREFIX), iter(lines))
             )
-            if lines:
-                rule_name: str = lines[0][len(cls.RULE_ERROR_PREFIX) : -1]
-                assert len(lines) > 1, (
-                    f"Expected at least one line in the Snakemake log file after:\n{lines[0]}"
-                )
-                lines = list(
-                    dropwhile(
-                        lambda line: not line.startswith(cls.LOG_PREFIX)
-                        and not line.startswith(cls.SHELL_PREFIX)
-                        and not line.startswith(cls.RULE_ERROR_PREFIX),
-                        iter(lines[1:]),
-                    )
-                )
-                if lines and lines[0].startswith(cls.SHELL_PREFIX):
-                    logs.append(RuleLog(path=None, name=rule_name))
-                elif lines and lines[0].startswith(cls.LOG_PREFIX):
-                    log_files: list[str] = lines[0][
-                        len(cls.LOG_PREFIX) : -len(cls.LOG_SUFFIX)
-                    ].split(", ")
+            if len(lines) == 0:
+                continue
 
-                    for log_file in log_files:
-                        log_path = log_dir / log_file
-                        logs.append(RuleLog(path=log_path, name=rule_name))
+            rule_name: str = lines[0][len(cls.RULE_ERROR_PREFIX) : -1]
+            assert len(lines) > 1, (
+                f"Expected at least one line in the Snakemake log file after:\n{lines[0]}"
+            )
+            lines = list(
+                dropwhile(
+                    lambda line: not line.startswith(cls.LOG_PREFIX)
+                    and not line.startswith(cls.SHELL_PREFIX)
+                    and not line.startswith(cls.RULE_ERROR_PREFIX),
+                    iter(lines[1:]),
+                )
+            )
+            if len(lines) == 0:
+                continue
 
-                    lines = lines[1:]
+            if lines[0].startswith(cls.SHELL_PREFIX):
+                logs.append(RuleLog(path=None, name=rule_name))
+            elif lines[0].startswith(cls.LOG_PREFIX):
+                log_files: list[str] = lines[0][len(cls.LOG_PREFIX) : -len(cls.LOG_SUFFIX)].split(
+                    ", "
+                )
+
+                for log_file in log_files:
+                    log_path = log_dir / log_file
+                    logs.append(RuleLog(path=log_path, name=rule_name))
+
+                lines = lines[1:]
 
         return logs
 
