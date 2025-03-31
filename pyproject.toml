@@ -1,6 +1,6 @@
 [tool.poetry]
 name          = "fgsmk"
-version       = "0.1.0"
+version       = "0.1.1"
 description   = "Supporting functions for running Snakemake workflows."
 readme        = "README.md"
 authors       = ["Fulcrum Genomics LLC <contact@fulcrumgenomics.com>"]
