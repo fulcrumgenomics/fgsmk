@@ -5,6 +5,7 @@
 [![Type Checked][type-checking-badge]][type-checking-link]
 [![PEP8][pep-8-badge]][pep-8-link]
 [![Poetry][poetry-badge]][poetry-link]
+[![DOI][zenodo-badge]][zenodo-link]
 
 ---
 
@@ -34,6 +35,8 @@
 [pypi-link]:             https://pypi.python.org/pypi/fgsmk
 [pypi-downloads-badge]:  https://img.shields.io/pypi/dm/fgsmk
 [pypi-downloads-link]:   https://pypi.python.org/pypi/fgsmk
+[zenodo-badge]:          https://zenodo.org/badge/916232349.svg
+[zenodo-link]:           https://doi.org/10.5281/zenodo.15558165
 
 # fgsmk
 
