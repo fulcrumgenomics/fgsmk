@@ -5,14 +5,15 @@
 [![Type Checked][type-checking-badge]][type-checking-link]
 [![PEP8][pep-8-badge]][pep-8-link]
 [![Poetry][poetry-badge]][poetry-link]
-[![DOI][zenodo-badge]][zenodo-link]
+[![License][license-badge]][license-link]
 
 ---
 
-[![License][license-badge]][license-link]
 [![Python package][python-package-badge]][python-package-link]
 [![PyPI version][pypi-badge]][pypi-link]
 [![PyPI download total][pypi-downloads-badge]][pypi-downloads-link]
+[![Bioconda][bioconda-badge]][bioconda-link]
+[![DOI][zenodo-badge]][zenodo-link]
 
 ---
 [language-badge]:        http://img.shields.io/badge/language-python-brightgreen
@@ -35,6 +36,8 @@
 [pypi-link]:             https://pypi.python.org/pypi/fgsmk
 [pypi-downloads-badge]:  https://img.shields.io/pypi/dm/fgsmk
 [pypi-downloads-link]:   https://pypi.python.org/pypi/fgsmk
+[bioconda-badge]:        https://img.shields.io/conda/dn/bioconda/fgsmk.svg?label=Bioconda
+[bioconda-link]:         http://bioconda.github.io/recipes/fgsmk/README.html
 [zenodo-badge]:          https://zenodo.org/badge/916232349.svg
 [zenodo-link]:           https://doi.org/10.5281/zenodo.15558165
 
