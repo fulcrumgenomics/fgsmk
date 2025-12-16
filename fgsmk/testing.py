@@ -7,16 +7,19 @@ of each pipeline, which should be done elsewhere.
 """
 
 import logging
+import threading
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
-from typing import Callable
+from typing import ClassVar
 from typing import Dict
 from typing import List
 from typing import Optional
 
 from snakemake.api import SnakemakeApi
 from snakemake.exceptions import WorkflowError
+from snakemake.logging import LogEvent
+from snakemake.logging import logger_manager
 from snakemake.settings.types import ConfigSettings
 from snakemake.settings.types import ExecutionSettings
 from snakemake.settings.types import OutputSettings
@@ -27,33 +30,66 @@ from snakemake_interface_executor_plugins.registry import ExecutorPluginRegistry
 logger = logging.getLogger(__name__)
 
 
-class SnakemakeLogger(object):
-    """Returns a log handler for snakemake and tracks if the rules that were run."""
+class SnakemakeLogger(logging.Handler):
+    """
+    A log handler for snakemake that tracks rules that were run.
+
+    This class extends Python's standard logging.Handler to capture
+    rule execution counts during workflow runs by listening for RUN_INFO events.
+    """
+
+    _current_instance: ClassVar[Optional["SnakemakeLogger"]] = None
+    _lock: ClassVar[threading.Lock] = threading.Lock()
 
     def __init__(self) -> None:
-        """Builds a new logger."""
+        """Initialize the handler."""
+        super().__init__()
         self.rule_count: Dict[str, int] = defaultdict(lambda: 0)
+        self._counted: bool = False
+        with SnakemakeLogger._lock:
+            SnakemakeLogger._current_instance = self
 
-    def log_handler(self) -> Callable[[Dict[str, Any]], None]:
-        """Returns a log handler for use with snakemake."""
+    @classmethod
+    def get_current_instance(cls) -> Optional["SnakemakeLogger"]:
+        """Get the most recently created logger instance."""
+        with cls._lock:
+            return cls._current_instance
 
-        def fn(d: Dict[str, Any]) -> None:
-            if d["level"] != "run_info":
-                return
+    @classmethod
+    def clear_current_instance(cls) -> None:
+        """Clear the current instance reference."""
+        with cls._lock:
+            cls._current_instance = None
 
-            # Only count the summary once.
-            if len(self.rule_count.keys()) > 0:
-                return
+    def emit(self, record: logging.LogRecord) -> None:
+        """
+        Process a log record from Snakemake.
 
-            # NB: skip the first three, and skip the last, lines
-            for counts_line in d["msg"].split("\n")[3:-1]:
-                counts_line = counts_line.strip()
-                job, count = counts_line.split()
+        Filters for RUN_INFO events and extracts rule counts from the summary message.
+
+        Args:
+            record: The log record from Snakemake containing event information.
+        """
+        if not hasattr(record, "event") or record.event != LogEvent.RUN_INFO:
+            return
+
+        if self._counted:
+            return
+
+        msg = record.getMessage() if hasattr(record, "getMessage") else str(record.msg)
+
+        # NB: skip the first three, and skip the last, lines
+        for counts_line in msg.split("\n")[3:-1]:
+            counts_line = counts_line.strip()
+            if not counts_line:
+                continue
+            parts = counts_line.split()
+            if len(parts) >= 2:
+                job, count = parts[0], parts[1]
                 assert int(count) > 0, counts_line
-
                 self.rule_count[job] += int(count)
 
-        return fn
+        self._counted = True
 
 
 def run_snakemake(
@@ -80,7 +116,12 @@ def run_snakemake(
     assert snakefile.is_file(), f"{snakefile} is not a file"
     assert snakefile.exists(), f"{snakefile} does not exist"
 
+    # Clear any previous logger instance
+    SnakemakeLogger.clear_current_instance()
+
+    # Create our logger handler and add it to the snakemake logger
     snakemake_logger = SnakemakeLogger()
+
     quietness = None if quiet else {Quietness.ALL}
 
     executor_plugin = ExecutorPluginRegistry().get_plugin(executor_name)
@@ -89,11 +130,12 @@ def run_snakemake(
     with SnakemakeApi(
         OutputSettings(
             quiet=quietness,
-            log_handlers=[snakemake_logger.log_handler()],
             keep_logger=False,
             stdout=True,
         )
     ) as snakemake_api:
+        # Add our handler to the snakemake logger after setup
+        logger_manager.logger.addHandler(snakemake_logger)
         workflow_api = snakemake_api.workflow(
             resource_settings=ResourceSettings(
                 cores=1,
@@ -123,6 +165,9 @@ def run_snakemake(
         except WorkflowError as e:
             logger.warning(e)
             return snakemake_logger
+        finally:
+            # Remove our handler to avoid duplicate handlers on subsequent runs
+            logger_manager.logger.removeHandler(snakemake_logger)
 
     # check the "all" rule
     assert snakemake_logger.rule_count["all"] == 1, (

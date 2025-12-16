@@ -6,12 +6,16 @@ from itertools import dropwhile
 from pathlib import Path
 from typing import Any
 from typing import ClassVar
+from typing import TypeAlias
 
 from fgpyo.io import assert_path_is_readable
 from fgpyo.io import assert_path_is_writable
 
 from fgsmk.io import __LINES_PER_LOGFILE
 from fgsmk.io import _last_lines
+
+RuleName: TypeAlias = str
+JobId: TypeAlias = str
 
 
 @dataclass(frozen=True)
@@ -32,13 +36,20 @@ class RuleLog:
     LOG_SUFFIX: ClassVar[str] = " (check log file(s) for error details)"
     SHELL_PREFIX: ClassVar[str] = "    shell:"
 
+    JOBID_PREFIX: ClassVar[str] = "    jobid: "
+
     @classmethod
-    def many_from_log_file(cls, log_dir: Path, snakemake_log: Path) -> list["RuleLog"]:
+    def many_from_log_file(  # noqa: C901
+        cls, log_dir: Path, snakemake_log: Path
+    ) -> list["RuleLog"]:
         """
         Gets the logs for the rules from a Snakemake log file for failed invocations.
 
         If there is more than one log file for a rule, all of them will be included. If there is no
         log file defined for a rule, it will be reported but with the path set to `None`.
+
+        Note: In snakemake v9, errors are logged twice (once when they occur, and once in a
+        summary at the end). This function deduplicates based on (rule_name, jobid).
 
         Args:
             log_dir: the directory containing all the log files
@@ -51,6 +62,8 @@ class RuleLog:
         lines: list[str] = snakemake_log.read_text().splitlines()
 
         logs: list[RuleLog] = []
+        seen_jobs: set[tuple[RuleName, JobId]] = set()
+
         while lines:
             lines = list(
                 dropwhile(lambda line: not line.startswith(cls.RULE_ERROR_PREFIX), iter(lines))
@@ -62,6 +75,23 @@ class RuleLog:
             assert len(lines) > 1, (
                 f"Expected at least one line in the Snakemake log file after:\n{lines[0]}"
             )
+
+            # Extract jobid for deduplication (jobid appears before log/shell in error block)
+            jobid: JobId | None = None
+            for line in lines[1:]:
+                if line.startswith(cls.LOG_PREFIX) or line.startswith(cls.SHELL_PREFIX):
+                    break
+                if line.startswith(cls.JOBID_PREFIX):
+                    jobid = line.removeprefix(cls.JOBID_PREFIX).strip()
+                    break
+
+            # Skip if we've already seen this (rule_name, jobid) combination
+            if jobid is not None and (rule_name, jobid) in seen_jobs:
+                lines = lines[1:]
+                continue
+            if jobid is not None:
+                seen_jobs.add((rule_name, jobid))
+
             lines = list(
                 dropwhile(
                     lambda line: not line.startswith(cls.LOG_PREFIX)
