@@ -6,12 +6,16 @@ from itertools import dropwhile
 from pathlib import Path
 from typing import Any
 from typing import ClassVar
+from typing import TypeAlias
 
 from fgpyo.io import assert_path_is_readable
 from fgpyo.io import assert_path_is_writable
 
 from fgsmk.io import __LINES_PER_LOGFILE
 from fgsmk.io import _last_lines
+
+RuleName: TypeAlias = str
+JobId: TypeAlias = str
 
 
 @dataclass(frozen=True)
@@ -58,7 +62,7 @@ class RuleLog:
         lines: list[str] = snakemake_log.read_text().splitlines()
 
         logs: list[RuleLog] = []
-        seen_jobs: set[tuple[str, str]] = set()  # (rule_name, jobid)
+        seen_jobs: set[tuple[RuleName, JobId]] = set()
 
         while lines:
             lines = list(
@@ -72,11 +76,13 @@ class RuleLog:
                 f"Expected at least one line in the Snakemake log file after:\n{lines[0]}"
             )
 
-            # Extract jobid for deduplication
-            jobid: str | None = None
-            for line in lines[1:5]:  # Check next few lines for jobid
+            # Extract jobid for deduplication (jobid appears before log/shell in error block)
+            jobid: JobId | None = None
+            for line in lines[1:]:
+                if line.startswith(cls.LOG_PREFIX) or line.startswith(cls.SHELL_PREFIX):
+                    break
                 if line.startswith(cls.JOBID_PREFIX):
-                    jobid = line[len(cls.JOBID_PREFIX) :].strip()
+                    jobid = line.removeprefix(cls.JOBID_PREFIX).strip()
                     break
 
             # Skip if we've already seen this (rule_name, jobid) combination
