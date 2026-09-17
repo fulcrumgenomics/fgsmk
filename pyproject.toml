@@ -1,6 +1,6 @@
 [tool.poetry]
 name          = "fgsmk"
-version       = "0.1.2"
+version       = "1.0.0"
 description   = "Supporting functions for running Snakemake workflows."
 readme        = "README.md"
 authors       = ["Fulcrum Genomics LLC <contact@fulcrumgenomics.com>"]
@@ -10,7 +10,7 @@ homepage      = "https://github.com/fulcrumgenomics/fgsmk"
 repository    = "https://github.com/fulcrumgenomics/fgsmk"
 documentation = "https://github.com/fulcrumgenomics/fgsmk"
 classifiers   = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
